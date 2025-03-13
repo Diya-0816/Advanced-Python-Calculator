@@ -5,7 +5,9 @@ from calculator.logger import Logger
 def repl():
     calc = Calculator()
     history = CalculationHistory()
-    
+
+    Logger.log_info("Calculator REPL started.")
+
     print("Advanced Python Calculator (Type 'exit' to quit)")
     print("Commands: 'history' to view, 'clear' to delete all, 'delete' to remove last entry")
 
@@ -17,8 +19,9 @@ def repl():
                 Logger.log_info("User exited the calculator.")
                 break
             elif user_input.lower() == 'history':
-                print(history.load_history())
-                Logger.log_info("User viewed calculation history.")
+                history_data = history.load_history()
+                print(history_data)
+                Logger.log_info(f"User viewed calculation history: {history_data.shape[0]} entries")
                 continue
             elif user_input.lower() == 'clear':
                 history.clear_history()
@@ -26,8 +29,9 @@ def repl():
                 Logger.log_info("User cleared calculation history.")
                 continue
             elif user_input.lower() == 'delete':
-                print(history.delete_last_entry())
-                Logger.log_info("User deleted the last entry in history.")
+                msg = history.delete_last_entry()
+                print(msg)
+                Logger.log_info(msg)
                 continue
 
             parts = user_input.split()
@@ -37,7 +41,12 @@ def repl():
                 continue
 
             num1, operator, num2 = parts
-            num1, num2 = float(num1), float(num2)
+            try:
+                num1, num2 = float(num1), float(num2)
+            except ValueError:
+                print("Invalid numbers entered!")
+                Logger.log_error(f"Invalid number input: {user_input}")
+                continue
 
             if operator == '+':
                 result = calc.add(num1, num2)
@@ -53,12 +62,9 @@ def repl():
                 continue
 
             print(f"Result: {result}")
-            history.save_calculation(num1, operator, num2, result)  # Save to history
+            history.save_calculation(num1, operator, num2, result)
             Logger.log_info(f"User performed calculation: {num1} {operator} {num2} = {result}")
 
-        except ValueError as ve:
-            print(f"Input Error: {ve}")
-            Logger.log_error(f"ValueError: {ve}")
         except Exception as e:
             print(f"Unexpected Error: {e}")
             Logger.log_error(f"Unexpected Error: {e}")
