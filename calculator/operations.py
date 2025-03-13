@@ -1,3 +1,5 @@
+from calculator.exceptions import DivisionByZeroError
+
 class Calculator:
     def add(self, a, b):
         return a + b
@@ -10,5 +12,5 @@ class Calculator:
 
     def divide(self, a, b):
         if b == 0:
-            raise ValueError("Cannot divide by zero")
-        return a / b 
+            raise DivisionByZeroError("Cannot divide by zero")
+        return a / b

@@ -1,6 +1,7 @@
 from calculator.operations import Calculator
 from calculator.history import CalculationHistory
 from calculator.logger import Logger
+from calculator.exceptions import InvalidInputError, DivisionByZeroError
 
 def repl():
     calc = Calculator()
@@ -36,9 +37,8 @@ def repl():
 
             parts = user_input.split()
             if len(parts) != 3:
-                print("Invalid format! Use: <num1> <operator> <num2> (e.g., 3 + 2)")
                 Logger.log_error(f"Invalid input format: {user_input}")
-                continue
+                raise InvalidInputError("Invalid format! Use: <num1> <operator> <num2> (e.g., 3 + 2)")
 
             num1, operator, num2 = parts
             try:
@@ -55,7 +55,12 @@ def repl():
             elif operator == '*':
                 result = calc.multiply(num1, num2)
             elif operator == '/':
-                result = calc.divide(num1, num2)
+                try:
+                    result = calc.divide(num1, num2)
+                except DivisionByZeroError as e:
+                    print(f"Error: {e}")
+                    Logger.log_error(f"Division by zero error: {e}")
+                    continue
             else:
                 print("Invalid operator! Use +, -, *, or /")
                 Logger.log_error(f"Invalid operator used: {operator}")
@@ -64,6 +69,10 @@ def repl():
             print(f"Result: {result}")
             history.save_calculation(num1, operator, num2, result)
             Logger.log_info(f"User performed calculation: {num1} {operator} {num2} = {result}")
+
+        except InvalidInputError as e:
+            print(f"Input Error: {e}")
+            Logger.log_error(f"Invalid input error: {e}")
 
         except Exception as e:
             print(f"Unexpected Error: {e}")
